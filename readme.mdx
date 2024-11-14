@@ -13,6 +13,8 @@
 
 - [How to run?](#how-to-run)
 
+- [Program Structure](#program-structure)
+
 
 
 
@@ -36,3 +38,117 @@
 
 - Alternatively, you can also simply run `python3 gatorTicketMaster.py <input_file.txt>`
 
+
+
+## Program Structure
+
+### `gatorTicketMaster.py`
+
+The program starts at `gatorTicketMaster.py` which reads the input file and parses each line and prints out the output depending upon the input commands.
+
+It calls the `TicketMaster` class which has the overall implementation of the program.
+
+```
+ticket_master  =  TicketMaster()
+```
+
+The `process_command` method is called which then parses and runs each line as prints the output. This file acts like a black box that hides all the implementation details within the class `TicketMaster`.
+```
+result  =  process_command(ticket_master, line)
+```
+
+### `TicketMaster.py` Class Overview
+
+This class defines each method implemented for the program. It is also responsible for returning the correct responses according to the project draft.
+
+Since all the implementation procedures were defined in the project draft, only the overview is stated here.
+
+Let's look at the class variables that save the object's state at any given time.
+
+```
+def  __init__(self):
+	self.reserved_seats  =  RedBlackTree() # Maps user_id to seat_id
+	self.waitlist  =  BinaryMinHeap() # Priority queue for waiting users
+	self.available_seats  =  BinaryMinHeap() # Heap for available seat numbers
+	self.seat_to_user  = {} # Quick lookup for seat to user mapping
+	self.max_seat_number  =  0  # Keep track of highest seat number
+```
+
+When we initialize the number of seats, we create instances of the two important data structures written from scratch for this project. Here's the part of the `initialize(self, seat_count)` method below:
+
+```
+# Reset all data structures
+self.reserved_seats  =  RedBlackTree()
+self.waitlist  =  BinaryMinHeap()
+self.available_seats  =  BinaryMinHeap()
+self.seat_to_user  = {}
+```
+
+
+### `BinaryMinHeap.py` Class Overview
+
+The `BinaryMinHeap` class implements a priority queue using a binary min-heap data structure to manage waitlist entries and available seats efficiently. Below is a description of the class methods and functionality.
+
+Let's first look at the `HeapNode` and its variables.
+```
+class  HeapNode:
+	def  __init__(self, priority, user_id, timestamp):
+		self.priority  =  priority
+		self.user_id  =  user_id
+		self.timestamp  =  timestamp
+```
+
+**Class Variables**:
+   - `heap`: Stores `HeapNode` elements in a list format.
+   - `position`: Dictionary mapping `user_id` to its index within the heap for quick lookup.
+
+**Methods**:
+   - **parent, left_child, right_child**: Helper methods to calculate the indices of parent and child nodes.
+   - **swap**: Swaps two nodes in the heap and updates their positions in `position`.
+   - **heapify_up**: Bubbles up a node based on priority, maintaining the heap property.
+   - **heapify_down**: Pushes a node down to restore heap order after deletion or insertion.
+   - **insert**: Adds a `HeapNode` to the heap, adjusts position, and applies `heapify_up`.
+   - **extract_max**: Removes and returns the highest-priority element, restructuring the heap afterward.
+   - **update_priority**: Changes a node's priority, performing `heapify_up` or `heapify_down` to maintain order.
+   - **remove**: Deletes a node by replacing it with the last element and reordering the heap.
+   - **is_empty, size, contains**: Utility methods to check heap status and user presence.
+
+This structure allows `BinaryMinHeap` to manage waitlists or available seats with priority-based organization efficiently, supporting quick inserts, deletions, and priority updates.
+
+
+### `RedBlackTree.py` Class Overview
+
+The `RedBlackTree` class is implemented to manage seat reservations efficiently by associating `user_id` and `seat_id`. This structure ensures balanced insertion and deletion operations.
+
+#### Class Components
+
+1. **RBNode Class**:
+   - Represents each node in the Red-Black Tree.
+   - **Attributes**: `user_id`, `seat_id`, `left`, `right`, `parent`, and `color`.
+   - New nodes are initially red, maintaining Red-Black Tree properties after insertion.
+
+2. **Constructor (`__init__`)**:
+   - Initializes an empty tree with a `NIL` node to represent leaf nodes, ensuring balanced behavior.
+
+3. **Rotations** (`left_rotate` and `right_rotate`):
+   - Essential for balancing the tree after insertion or deletion. Rotations help in maintaining the Red-Black Tree properties, ensuring O(log n) time complexity for operations.
+
+4. **Insertion (`insert`)**:
+   - Inserts a node based on `user_id` as the key and applies `fix_insert` to maintain Red-Black properties, adjusting node colors and performing rotations as needed.
+
+5. **Fix-Up for Insertion (`fix_insert`)**:
+   - Ensures Red-Black properties post-insertion. This function changes node colors or rotates the tree based on the colors of a node's parent and uncle.
+
+6. **Deletion (`delete`)**:
+   - Deletes a node by linking it with a successor and applying `fix_delete` to rebalance the tree.
+
+7. **Fix-Up for Deletion (`fix_delete`)**:
+   - Adjusts colors and performs rotations if necessary to maintain the Red-Black properties after node removal.
+
+8. **Helper Methods**:
+   - **`transplant`**: Replaces a subtree with another during deletion.
+   - **`minimum`**: Finds the smallest node, used for determining successors during deletion.
+   - **`search`**: Finds a node by `user_id`, returning `None` if not found.
+   - **`inorder_traverse`**: Collects the tree nodes in ascending order by seat ID, helping to list current reservations.
+
+This structure enables efficient seat management by ensuring all operations—insertions, deletions, and lookups—run in balanced time.
